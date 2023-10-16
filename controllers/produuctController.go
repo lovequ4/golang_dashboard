@@ -19,6 +19,7 @@ type ProductCreatedForm struct {
 
 // @Tags   ProductAPI
 // @Router /products [post]
+// @Param Authorization header string true "JWT token" default(Bearer)
 // @Param  Request body ProductCreatedForm true "Product Created data"
 func ProductCreate(c *gin.Context) {
 	product := models.Product{}
@@ -72,6 +73,7 @@ func ProductCreate(c *gin.Context) {
 
 // @Tags   ProductAPI
 // @Router /products [get]
+// @Param Authorization header string true "JWT token" default(Bearer)
 func AllProducts(c *gin.Context) {
 	var product []models.Product
 
@@ -97,7 +99,8 @@ type ProductPutForm struct {
 // @Tags   ProductAPI
 // @Router /products/{id} [put]
 // @Param  id path int true "Product ID"
-// @Param  Request body ProductPutForm true "Product Created data"
+// @Param  Request body ProductPutForm true "Product Update data"
+// @Param Authorization header string true "JWT token" default(Bearer)
 func ProductPut(c *gin.Context) {
 	productId := c.Param("id")
 
@@ -145,6 +148,7 @@ func ProductPut(c *gin.Context) {
 // @Tags   ProductAPI
 // @Router /products/{id} [delete]
 // @Param  id path int true "Product ID"
+// @Param Authorization header string true "JWT token" default(Bearer)
 func ProductDelete(c *gin.Context) {
 	productId := c.Param("id")
 

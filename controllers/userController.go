@@ -121,7 +121,7 @@ func SignIn(c *gin.Context) {
 			})
 		}
 
-		token, err := token.GenerateToken(user.Id)
+		token, err := token.GenerateToken(user.Id, user.Name, user.Role)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
