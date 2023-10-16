@@ -22,6 +22,7 @@ func main() {
 	r := gin.Default()
 
 	router.UserRoutes(r) // 引入user router
+	router.ProductRoutes(r)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerFiles.Handler,
