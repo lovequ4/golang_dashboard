@@ -4,11 +4,13 @@ import (
 	"Demo/database"
 	token "Demo/middlewares"
 	"Demo/models"
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 //為了讓swagger 可以@注釋使用，把struct移到func外
@@ -38,38 +40,47 @@ func SignUp(c *gin.Context) {
 	}
 
 	checkEmail := database.DB.Where("email=?", signUpFormData.Email).First(&user)
-	if checkEmail.Error == nil {
+	if checkEmail.Error != nil {
+		if errors.Is(checkEmail.Error, gorm.ErrRecordNotFound) {
+			hashedPassword, err := bcrypt.GenerateFromPassword([]byte(signUpFormData.Password), bcrypt.DefaultCost)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"message": "Error occurred encrypting password",
+				})
+				return
+			}
+
+			user = models.User{
+				Name:     signUpFormData.Name,
+				Password: string(hashedPassword),
+				Email:    signUpFormData.Email,
+				Date:     time.Now(),
+			}
+
+			result := database.DB.Save(&user)
+			if result.Error != nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"message": "Database operation failed",
+				})
+				return
+			} else {
+				c.JSON(http.StatusOK, gin.H{
+					"message": "Saved data successfully",
+				})
+			}
+
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "An error occurred while checking email",
+			})
+			return
+		}
+
+	} else {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Email already exists",
 		})
 		return
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(signUpFormData.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Error occurred encrypting password",
-		})
-		return
-	}
-
-	user = models.User{
-		Name:     signUpFormData.Name,
-		Password: string(hashedPassword),
-		Email:    signUpFormData.Email,
-		Date:     time.Now(),
-	}
-
-	result := database.DB.Save(&user)
-	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Database operation failed",
-		})
-		return
-	} else {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Saved data successfully",
-		})
 	}
 }
 
