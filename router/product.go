@@ -2,6 +2,7 @@ package router
 
 import (
 	"Demo/controllers"
+	"Demo/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,19 +10,19 @@ import (
 func ProductRoutes(router *gin.Engine) {
 	product := router.Group("/products")
 
-	product.POST("", func(c *gin.Context) {
+	product.POST("", middlewares.AuthMiddleware("admin"), func(c *gin.Context) {
 		controllers.ProductCreate(c)
 	})
 
-	product.GET("", func(c *gin.Context) {
+	product.GET("", middlewares.AuthMiddleware(), func(c *gin.Context) {
 		controllers.AllProducts(c)
 	})
 
-	product.PUT(":id", func(c *gin.Context) {
+	product.PUT(":id", middlewares.AuthMiddleware("admin"), func(c *gin.Context) {
 		controllers.ProductPut(c)
 	})
 
-	product.DELETE(":id", func(c *gin.Context) {
+	product.DELETE(":id", middlewares.AuthMiddleware("admin"), func(c *gin.Context) {
 		controllers.ProductDelete(c)
 	})
 }
