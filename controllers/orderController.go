@@ -90,31 +90,17 @@ func OrderCreate(c *gin.Context) {
 // @Router /orders [get]
 // @Param Authorization header string true "JWT token" default(Bearer)
 func AllOrders(c *gin.Context) {
-	// 启用 GORM 的详细日志记录模式
-	database.DB = database.DB.Debug()
 
-	var order []models.Order
+	var orders []models.Order
 
-	if err := database.DB.Omit("Product").Find(&order).Error; err != nil {
+	if err := database.DB.Preload("Product").Find(&orders).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Failed to find orders",
 		})
 		return
 	}
 
-	orderResponses := []map[string]interface{}{}
-
-	for _, order := range order {
-		orderResponse := map[string]interface{}{
-			"Id":           order.Id,
-			"CustomerName": order.CustomerName,
-			"Quantity":     order.Quantity,
-			"Price":        order.Price,
-			"CreateDate":   order.CreateDate,
-		}
-		orderResponses = append(orderResponses, orderResponse)
-	}
-	c.JSON(http.StatusOK, orderResponses)
+	c.JSON(http.StatusOK, orders)
 }
 
 type OrderPutForm struct {
