@@ -5,6 +5,7 @@ import (
 	_ "Demo/docs"
 	"Demo/router"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -20,6 +21,11 @@ func init() { //main() 函數之前被調用
 // @host localhost:8080
 func main() {
 	r := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	r.Use(cors.New(config))
 
 	router.UserRoutes(r) // 引入user router
 	router.ProductRoutes(r)
