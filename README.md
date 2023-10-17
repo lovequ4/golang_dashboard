@@ -6,7 +6,9 @@ Tool:swagger
 
 Backend: golang + gin
 
-Frontend: vue3 + quasar framework
+Frontend: vue3 + quasar framework + chart.js
+
+使用golang + vue3 做一個管理系統，可以對訂單、產品、員工進行管理，Dashboard顯示圖表
 
 註冊、登入  新增產品
 ![image](https://github.com/lovequ4/golang_dashboard/blob/main/ScreenShot/Recording%202023-10-17%20at%2013.50.29.gif)
