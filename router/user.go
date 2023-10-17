@@ -2,6 +2,7 @@ package router
 
 import (
 	"Demo/controllers"
+	"Demo/middlewares"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,4 +18,11 @@ func UserRoutes(router *gin.Engine) {
 		controllers.SignIn(c)
 	})
 
+	user.GET("", middlewares.AuthMiddleware("admin"), func(c *gin.Context) {
+		controllers.AllUsers(c)
+	})
+
+	user.PUT(":id", middlewares.AuthMiddleware("admin"), func(c *gin.Context) {
+		controllers.UserPut(c)
+	})
 }
