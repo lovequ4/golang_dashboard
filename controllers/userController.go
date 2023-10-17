@@ -135,3 +135,74 @@ func SignIn(c *gin.Context) {
 		})
 	}
 }
+
+// @Tags   UserAPI
+// @Router /users [get]
+// @Param Authorization header string true "JWT token" default(Bearer)
+func AllUsers(c *gin.Context) {
+	var users []models.User
+	database.DB = database.DB.Debug()
+	if err := database.DB.Select("id,name,email,role,date").Find(&users).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Failed to find user",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
+}
+
+type UserPutForm struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
+// @Tags   UserAPI
+// @Router /users/{id} [put]
+// @Param  id path int true "User ID"
+// @Param Authorization header string true "JWT token" default(Bearer)
+// @Param Request body UserPutForm true "User Put data"
+func UserPut(c *gin.Context) {
+	userId := c.Param("id")
+
+	user := models.User{}
+
+	var PutForm UserPutForm
+
+	if err := c.ShouldBindJSON(&PutForm); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Not Found PutForm data",
+		})
+		return
+	}
+
+	if err := database.DB.Where("id=?", userId).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "User not found",
+			})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Database operation failed",
+			})
+		}
+		return
+	}
+
+	updates := map[string]interface{}{
+		"Name":  PutForm.Name,
+		"Email": PutForm.Email,
+		"Role":  PutForm.Role,
+	}
+
+	result := database.DB.Model(&user).Updates(updates)
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Database operation failed",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
